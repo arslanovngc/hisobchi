@@ -16,8 +16,9 @@ import {
   StatLabel,
   StatNumber,
   Text,
+  useToast,
 } from '@chakra-ui/react';
-import { Plus, UsersRound } from 'lucide-react';
+import { Clipboard, Plus, UsersRound } from 'lucide-react';
 import { EmptyState } from '../../components/EmptyState';
 import { NumberField } from '../../components/NumberField';
 import { RemoveIconButton } from '../../components/RemoveIconButton';
@@ -40,6 +41,19 @@ export type PeopleStepProps = {
 };
 
 export default function PeopleStep(props: PeopleStepProps) {
+  const toast = useToast();
+
+  async function copyFinalSplit() {
+    await navigator.clipboard.writeText(formatSplitForCopy(props.totals));
+    toast({
+      title: 'Copied',
+      status: 'success',
+      duration: 1600,
+      isClosable: true,
+      position: 'top',
+    });
+  }
+
   return (
     <Stack spacing={5}>
       <Card variant='outline' borderColor='purple.200'>
@@ -88,9 +102,21 @@ export default function PeopleStep(props: PeopleStepProps) {
 
       <Card variant='outline' borderColor='green.200'>
         <CardBody>
-          <Heading as='h2' size='md' mb={5}>
-            Final split
-          </Heading>
+          <Flex align='center' justify='space-between' gap={3} mb={5}>
+            <Heading as='h2' size='md'>
+              Final split
+            </Heading>
+            <Button
+              leftIcon={<Clipboard size={18} />}
+              size='sm'
+              variant='outline'
+              colorScheme='teal'
+              onClick={copyFinalSplit}
+              isDisabled={props.totals.length === 0}
+            >
+              Copy
+            </Button>
+          </Flex>
           <Stack spacing={3}>
             {props.totals.map((total) => (
               <Box key={total.personId} rounded='lg' borderWidth='1px' p={4}>
@@ -177,4 +203,8 @@ function AssignmentCard(props: PeopleStepProps & { item: Item }) {
       </Button>
     </Box>
   );
+}
+
+function formatSplitForCopy(totals: PersonTotal[]) {
+  return totals.map((total) => `${total.name}: ${amount.format(total.total)}`).join('\n');
 }
