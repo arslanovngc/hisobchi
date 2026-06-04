@@ -14,22 +14,18 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { ChevronDown, Moon, RotateCcw, Sun } from 'lucide-react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getMealLabel, getPeopleLabel } from '../lib/navigation';
-import type { Step } from '../types/bill';
 
 type AppHeaderProps = {
-  step: Step;
-  mealCount: number;
-  peopleCount: number;
-  onNavigate: (step: Step) => void;
   onReset: () => void;
 };
 
-export function AppHeader({ step, mealCount, peopleCount, onNavigate, onReset }: AppHeaderProps) {
+export function AppHeader({ onReset }: AppHeaderProps) {
   const { i18n, t } = useTranslation();
   const { colorMode, toggleColorMode } = useColorMode();
   const toast = useToast();
+  const resetWarningTimer = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const navBg = useColorModeValue('white', 'gray.800');
   const brandColor = useColorModeValue('teal.700', 'teal.200');
 
@@ -39,14 +35,28 @@ export function AppHeader({ step, mealCount, peopleCount, onNavigate, onReset }:
   }
 
   function warnBeforeReset() {
-    toast({
-      title: t('Resetting will delete everything.'),
-      description: t('Double-click Start over to confirm.'),
-      status: 'warning',
-      duration: 2400,
-      isClosable: true,
-      position: 'top',
-    });
+    if (resetWarningTimer.current) {
+      window.clearTimeout(resetWarningTimer.current);
+    }
+    resetWarningTimer.current = window.setTimeout(() => {
+      toast({
+        title: t('Resetting will delete everything.'),
+        description: t('Double-click Start over to confirm.'),
+        status: 'warning',
+        duration: 2400,
+        isClosable: true,
+        position: 'top',
+      });
+      resetWarningTimer.current = null;
+    }, 250);
+  }
+
+  function resetOnDoubleClick() {
+    if (resetWarningTimer.current) {
+      window.clearTimeout(resetWarningTimer.current);
+      resetWarningTimer.current = null;
+    }
+    onReset();
   }
 
   return (
@@ -55,15 +65,6 @@ export function AppHeader({ step, mealCount, peopleCount, onNavigate, onReset }:
         {t('Hisobchi')}
       </Heading>
       <HStack justify='end'>
-        <HStack borderWidth='1px' rounded='full' p={1} bg={navBg} aria-label={t('Progress')}>
-          <StepButton isActive={step === 1} onClick={() => onNavigate(1)}>
-            {getMealLabel(mealCount, t)}
-          </StepButton>
-          <StepButton isActive={step === 2} onClick={() => onNavigate(2)}>
-            {getPeopleLabel(peopleCount, t)}
-          </StepButton>
-        </HStack>
-
         <Menu>
           <MenuButton
             as={Button}
@@ -92,7 +93,7 @@ export function AppHeader({ step, mealCount, peopleCount, onNavigate, onReset }:
             aria-label={t('Start over')}
             icon={<RotateCcw size={18} />}
             onClick={warnBeforeReset}
-            onDoubleClick={onReset}
+            onDoubleClick={resetOnDoubleClick}
             variant='outline'
           />
         </Tooltip>
@@ -103,18 +104,4 @@ export function AppHeader({ step, mealCount, peopleCount, onNavigate, onReset }:
 
 function getLanguageLabel(language: string) {
   return language.toUpperCase().slice(0, 2);
-}
-
-function StepButton(props: { children: string; isActive: boolean; onClick: () => void }) {
-  return (
-    <Button
-      size='sm'
-      rounded='full'
-      colorScheme={props.isActive ? 'teal' : 'gray'}
-      variant={props.isActive ? 'solid' : 'ghost'}
-      onClick={props.onClick}
-    >
-      {props.children}
-    </Button>
-  );
 }

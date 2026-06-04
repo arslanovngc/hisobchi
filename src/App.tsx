@@ -107,9 +107,9 @@ export function App() {
   }
 
   return (
-    <Box minH='100vh' bg={shellBg} pt={{ base: 5, md: 8 }} pb={{ base: 40, md: 44 }}>
+    <Box minH='100vh' bg={shellBg} pt={{ base: 5, md: 8 }} pb={{ base: 48, md: 52 }}>
       <Container maxW='3xl'>
-        <AppHeader step={step} mealCount={items.length} peopleCount={people.length} onNavigate={navigateStep} onReset={resetBill} />
+        <AppHeader onReset={resetBill} />
         <Suspense fallback={<Spinner />}>
           {step === 1 ? (
             <MealStep
@@ -142,7 +142,7 @@ export function App() {
           )}
         </Suspense>
       </Container>
-      <BottomNav step={step} canContinue={canContinue} onNavigate={navigateStep} />
+      <BottomNav step={step} mealCount={items.length} peopleCount={people.length} canContinue={canContinue} onNavigate={navigateStep} />
     </Box>
   );
 }

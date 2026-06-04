@@ -15,8 +15,8 @@ export function BillTotals({ subtotal, taxAmount, serviceFee, grandTotal }: Bill
   return (
     <Stack spacing={3}>
       <TotalRow label={t('Subtotal')} value={subtotal} />
-      <TotalRow label={t('Tax')} value={taxAmount} />
-      <TotalRow label={t('Service')} value={serviceFee} />
+      <TotalRow label={t('Service fee (percentage)')} value={taxAmount} />
+      <TotalRow label={t('Service fee (amount)')} value={serviceFee} />
       <Divider />
       <Flex justify='space-between' fontSize='lg'>
         <Text fontWeight='bold'>{t('Total')}</Text>

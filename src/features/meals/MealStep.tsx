@@ -5,6 +5,7 @@ import { AmountField } from '../../components/AmountField';
 import { BillTotals } from '../../components/BillTotals';
 import { EmptyState } from '../../components/EmptyState';
 import { NumberField } from '../../components/NumberField';
+import { PercentField } from '../../components/PercentField';
 import { RemoveIconButton } from '../../components/RemoveIconButton';
 import type { Item } from '../../types/bill';
 
@@ -84,8 +85,8 @@ export default function MealStep(props: MealStepProps) {
             {t('Bill details')}
           </Heading>
           <Stack spacing={4}>
-            <NumberField label={t('Tax percent')} value={props.taxPercent} min={0} max={100} onChange={props.onTaxChange} />
-            <AmountField label={t('Service fee')} value={props.serviceFee} onChange={props.onServiceChange} />
+            <PercentField label={t('Service fee (percentage)')} value={props.taxPercent} onChange={props.onTaxChange} />
+            <AmountField label={t('Service fee (amount)')} value={props.serviceFee} onChange={props.onServiceChange} />
             <BillTotals
               subtotal={props.subtotal}
               taxAmount={props.taxAmount}
