@@ -1,5 +1,6 @@
 import { Button, Card, CardBody, Flex, FormControl, FormLabel, HStack, Heading, Input, Stack } from '@chakra-ui/react';
 import { Plus, ReceiptText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { AmountField } from '../../components/AmountField';
 import { BillTotals } from '../../components/BillTotals';
 import { EmptyState } from '../../components/EmptyState';
@@ -22,6 +23,8 @@ export type MealStepProps = {
 };
 
 export default function MealStep(props: MealStepProps) {
+  const { t } = useTranslation();
+
   return (
     <Stack spacing={5}>
       <Card variant='outline' borderColor='teal.200'>
@@ -29,34 +32,36 @@ export default function MealStep(props: MealStepProps) {
           <HStack mb={5}>
             <ReceiptText aria-hidden />
             <Heading as='h2' size='md'>
-              Meals and prices
+              {t('Meals and prices')}
             </Heading>
           </HStack>
           {props.items.length === 0 ? (
-            <EmptyState title='Start with a meal' description='Add each dish or shared item from the receipt.' />
+            <EmptyState title={t('Start with a meal')} description={t('Add each dish or shared item from the receipt.')} />
           ) : (
             <Stack spacing={4}>
               {props.items.map((item, index) => (
                 <Stack key={item.id} spacing={3} rounded='lg' borderWidth='1px' p={4}>
                   <Flex align='center' justify='space-between' gap={3}>
-                    <FormLabel m={0}>Meal {index + 1}</FormLabel>
+                    <FormLabel m={0}>
+                      {t('Meal')} {index + 1}
+                    </FormLabel>
                     <RemoveIconButton onRemove={() => props.onRemoveItem(item.id)} />
                   </Flex>
                   <FormControl>
                     <Input
                       value={item.name}
-                      placeholder='Meal name'
+                      placeholder={t('Meal name')}
                       onChange={(event) => props.onUpdateItem(item.id, { name: event.target.value })}
                     />
                   </FormControl>
                   <Stack spacing={3}>
                     <AmountField
-                      label='Price'
+                      label={t('Price')}
                       value={item.unitPrice}
                       onChange={(unitPrice) => props.onUpdateItem(item.id, { unitPrice })}
                     />
                     <NumberField
-                      label='Count'
+                      label={t('Count')}
                       value={item.count}
                       min={1}
                       step={1}
@@ -68,7 +73,7 @@ export default function MealStep(props: MealStepProps) {
             </Stack>
           )}
           <Button mt={5} leftIcon={<Plus size={18} />} onClick={props.onAddItem}>
-            Add meal
+            {t('Add meal')}
           </Button>
         </CardBody>
       </Card>
@@ -76,11 +81,11 @@ export default function MealStep(props: MealStepProps) {
       <Card variant='outline' borderColor='blue.200'>
         <CardBody>
           <Heading as='h2' size='md' mb={5}>
-            Bill details
+            {t('Bill details')}
           </Heading>
           <Stack spacing={4}>
-            <NumberField label='Tax percent' value={props.taxPercent} min={0} max={100} onChange={props.onTaxChange} />
-            <AmountField label='Service fee' value={props.serviceFee} onChange={props.onServiceChange} />
+            <NumberField label={t('Tax percent')} value={props.taxPercent} min={0} max={100} onChange={props.onTaxChange} />
+            <AmountField label={t('Service fee')} value={props.serviceFee} onChange={props.onServiceChange} />
             <BillTotals
               subtotal={props.subtotal}
               taxAmount={props.taxAmount}

@@ -1,5 +1,6 @@
 import { Box, Button, Container, Flex, useColorModeValue } from '@chakra-ui/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Step } from '../types/bill';
 
 type BottomNavProps = {
@@ -9,6 +10,7 @@ type BottomNavProps = {
 };
 
 export function BottomNav({ step, canContinue, onNavigate }: BottomNavProps) {
+  const { t } = useTranslation();
   const bg = useColorModeValue('whiteAlpha.900', 'gray.800');
 
   return (
@@ -26,7 +28,7 @@ export function BottomNav({ step, canContinue, onNavigate }: BottomNavProps) {
         >
           {step === 2 && (
             <Button leftIcon={<ArrowLeft size={18} />} onClick={() => onNavigate(1)} size='lg' flex={1}>
-              Back
+              {t('Back')}
             </Button>
           )}
           {step === 1 && (
@@ -38,7 +40,7 @@ export function BottomNav({ step, canContinue, onNavigate }: BottomNavProps) {
               size='lg'
               flex={1}
             >
-              Continue
+              {t('Continue')}
             </Button>
           )}
         </Flex>

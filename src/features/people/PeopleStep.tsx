@@ -19,6 +19,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { Clipboard, Plus, UsersRound } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../components/EmptyState';
 import { NumberField } from '../../components/NumberField';
 import { RemoveIconButton } from '../../components/RemoveIconButton';
@@ -42,11 +43,12 @@ export type PeopleStepProps = {
 
 export default function PeopleStep(props: PeopleStepProps) {
   const toast = useToast();
+  const { t } = useTranslation();
 
   async function copyFinalSplit() {
     await navigator.clipboard.writeText(formatSplitForCopy(props.totals));
     toast({
-      title: 'Copied',
+      title: t('Copied'),
       status: 'success',
       duration: 1600,
       isClosable: true,
@@ -61,23 +63,25 @@ export default function PeopleStep(props: PeopleStepProps) {
           <HStack mb={5}>
             <UsersRound aria-hidden />
             <Heading as='h2' size='md'>
-              People
+              {t('People')}
             </Heading>
           </HStack>
           {props.people.length === 0 ? (
-            <EmptyState title='Add lunch guests' description='Names help assign each item to the right person.' />
+            <EmptyState title={t('Add lunch guests')} description={t('Names help assign each item to the right person.')} />
           ) : (
             <Stack spacing={4}>
               {props.people.map((person, index) => (
                 <Stack key={person.id} spacing={3} rounded='lg' borderWidth='1px' p={4}>
                   <Flex align='center' justify='space-between' gap={3}>
-                    <FormLabel m={0}>Person {index + 1}</FormLabel>
+                    <FormLabel m={0}>
+                      {t('Person')} {index + 1}
+                    </FormLabel>
                     <RemoveIconButton onRemove={() => props.onRemovePerson(person.id)} />
                   </Flex>
                   <FormControl>
                     <Input
                       value={person.name}
-                      placeholder='Name'
+                      placeholder={t('Name')}
                       onChange={(event) => props.onUpdatePerson(person.id, event.target.value)}
                     />
                   </FormControl>
@@ -86,7 +90,7 @@ export default function PeopleStep(props: PeopleStepProps) {
             </Stack>
           )}
           <Button mt={5} leftIcon={<Plus size={18} />} onClick={props.onAddPerson}>
-            Add person
+            {t('Add person')}
           </Button>
         </CardBody>
       </Card>
@@ -94,7 +98,7 @@ export default function PeopleStep(props: PeopleStepProps) {
       <Card variant='outline' borderColor='orange.200'>
         <CardBody>
           <Heading as='h2' size='md' mb={5}>
-            Who ate what
+            {t('Who ate what')}
           </Heading>
           <AssignmentContent {...props} />
         </CardBody>
@@ -104,7 +108,7 @@ export default function PeopleStep(props: PeopleStepProps) {
         <CardBody>
           <Flex align='center' justify='space-between' gap={3} mb={5}>
             <Heading as='h2' size='md'>
-              Final split
+              {t('Final split')}
             </Heading>
             <Button
               leftIcon={<Clipboard size={18} />}
@@ -114,7 +118,7 @@ export default function PeopleStep(props: PeopleStepProps) {
               onClick={copyFinalSplit}
               isDisabled={props.totals.length === 0}
             >
-              Copy
+              {t('Copy')}
             </Button>
           </Flex>
           <Stack spacing={3}>
@@ -126,7 +130,7 @@ export default function PeopleStep(props: PeopleStepProps) {
                       {total.name}
                     </Heading>
                     <Text color='gray.500'>
-                      Food {amount.format(total.subtotal)} + extras {amount.format(total.extra)}
+                      {t('Food')} {amount.format(total.subtotal)} + {t('extras')} {amount.format(total.extra)}
                     </Text>
                   </Box>
                   <Heading as='p' size='md'>
@@ -138,14 +142,14 @@ export default function PeopleStep(props: PeopleStepProps) {
           </Stack>
           <Divider my={5} />
           <Flex justify='space-between' fontWeight='bold'>
-            <Text>Collected total</Text>
+            <Text>{t('Collected total')}</Text>
             <Text>{amount.format(props.totals.reduce((sum, total) => sum + total.total, 0))}</Text>
           </Flex>
         </CardBody>
       </Card>
 
       <Stat borderWidth='1px' rounded='lg' p={4}>
-        <StatLabel>Bill total</StatLabel>
+        <StatLabel>{t('Bill total')}</StatLabel>
         <StatNumber>{amount.format(props.grandTotal)}</StatNumber>
       </Stat>
     </Stack>
@@ -153,12 +157,14 @@ export default function PeopleStep(props: PeopleStepProps) {
 }
 
 function AssignmentContent(props: PeopleStepProps) {
+  const { t } = useTranslation();
+
   if (props.items.length === 0) {
-    return <EmptyState title='Nothing to assign yet' description='Add meals first, then return here to split them.' />;
+    return <EmptyState title={t('Nothing to assign yet')} description={t('Add meals first, then return here to split them.')} />;
   }
 
   if (!props.hasPeople) {
-    return <EmptyState title='No guests selected yet' description='Add at least one named person to enter meal counts.' />;
+    return <EmptyState title={t('No guests selected yet')} description={t('Add at least one named person to enter meal counts.')} />;
   }
 
   return (
@@ -171,13 +177,14 @@ function AssignmentContent(props: PeopleStepProps) {
 }
 
 function AssignmentCard(props: PeopleStepProps & { item: Item }) {
+  const { t } = useTranslation();
   const assigned = getAssignedCount(props.item.id, props.allocations);
 
   return (
     <Box rounded='lg' borderWidth='1px' p={4}>
       <Flex justify='space-between' align='start' gap={4} mb={4}>
         <Box>
-          <Text fontWeight='bold'>{props.item.name || 'Unnamed meal'}</Text>
+          <Text fontWeight='bold'>{props.item.name || t('Unnamed meal')}</Text>
           <Text color='gray.500'>
             {amount.format(props.item.unitPrice)} x {props.item.count}
           </Text>
@@ -190,7 +197,7 @@ function AssignmentCard(props: PeopleStepProps & { item: Item }) {
         {props.people.map((person) => (
           <NumberField
             key={person.id}
-            label={person.name || 'Unnamed'}
+            label={person.name || t('Unnamed')}
             value={props.allocations[props.item.id]?.[person.id] ?? 0}
             min={0}
             step={0.5}
@@ -199,7 +206,7 @@ function AssignmentCard(props: PeopleStepProps & { item: Item }) {
         ))}
       </Stack>
       <Button mt={4} size='sm' variant='outline' colorScheme='teal' onClick={() => props.onSplitEvenly(props.item)}>
-        Split evenly
+        {t('Split evenly')}
       </Button>
     </Box>
   );

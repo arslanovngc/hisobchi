@@ -1,4 +1,5 @@
 import { Divider, Flex, Stack, Text } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
 import { amount } from '../lib/format';
 
 type BillTotalsProps = {
@@ -9,14 +10,16 @@ type BillTotalsProps = {
 };
 
 export function BillTotals({ subtotal, taxAmount, serviceFee, grandTotal }: BillTotalsProps) {
+  const { t } = useTranslation();
+
   return (
     <Stack spacing={3}>
-      <TotalRow label='Subtotal' value={subtotal} />
-      <TotalRow label='Tax' value={taxAmount} />
-      <TotalRow label='Service' value={serviceFee} />
+      <TotalRow label={t('Subtotal')} value={subtotal} />
+      <TotalRow label={t('Tax')} value={taxAmount} />
+      <TotalRow label={t('Service')} value={serviceFee} />
       <Divider />
       <Flex justify='space-between' fontSize='lg'>
-        <Text fontWeight='bold'>Total</Text>
+        <Text fontWeight='bold'>{t('Total')}</Text>
         <Text fontWeight='bold'>{amount.format(grandTotal)}</Text>
       </Flex>
     </Stack>

@@ -11,10 +11,10 @@ export function persistStep(step: Step) {
   window.history.replaceState(null, '', url);
 }
 
-export function getMealLabel(count: number) {
-  return `${count || 'No'} ${count === 1 ? 'meal' : 'meals'}`;
+export function getMealLabel(count: number, t: (key: string) => string) {
+  return count === 0 ? t('No meals') : `${count} ${t(count === 1 ? 'meal' : 'meals')}`;
 }
 
-export function getPeopleLabel(count: number) {
-  return `${count || 'No'} ${count === 1 ? 'person' : 'people'}`;
+export function getPeopleLabel(count: number, t: (key: string) => string) {
+  return count === 0 ? t('No people') : `${count} ${t(count === 1 ? 'person' : 'people')}`;
 }
