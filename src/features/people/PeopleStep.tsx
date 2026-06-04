@@ -18,7 +18,7 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import { Clipboard, Plus, UsersRound } from 'lucide-react';
+import { Clipboard, Plus, UserPlus, UsersRound, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../components/EmptyState';
 import { NumberField } from '../../components/NumberField';
@@ -32,11 +32,15 @@ export type PeopleStepProps = {
   people: Person[];
   allocations: Allocation;
   totals: PersonTotal[];
+  nameSuggestions: string[];
   grandTotal: number;
   hasPeople: boolean;
   onAddPerson: () => void;
+  onAddSuggestedPerson: (name: string) => void;
   onRemovePerson: (id: string) => void;
   onUpdatePerson: (id: string, name: string) => void;
+  onRemoveNameSuggestion: (name: string) => void;
+  onClearNameSuggestions: () => void;
   onUpdateAllocation: (itemId: string, personId: string, value: number) => void;
   onSplitEvenly: (item: Item) => void;
 };
@@ -92,6 +96,13 @@ export default function PeopleStep(props: PeopleStepProps) {
           <Button mt={5} leftIcon={<Plus size={18} />} onClick={props.onAddPerson}>
             {t('Add person')}
           </Button>
+          <NameSuggestions
+            names={props.nameSuggestions}
+            people={props.people}
+            onAdd={props.onAddSuggestedPerson}
+            onRemove={props.onRemoveNameSuggestion}
+            onClear={props.onClearNameSuggestions}
+          />
         </CardBody>
       </Card>
 
@@ -154,6 +165,49 @@ export default function PeopleStep(props: PeopleStepProps) {
       </Stat>
     </Stack>
   );
+}
+
+function NameSuggestions(props: {
+  names: string[];
+  people: Person[];
+  onAdd: (name: string) => void;
+  onRemove: (name: string) => void;
+  onClear: () => void;
+}) {
+  const { t } = useTranslation();
+  const availableNames = props.names.filter(
+    (name) => !props.people.some((person) => normalizeName(person.name).toLocaleLowerCase() === normalizeName(name).toLocaleLowerCase()),
+  );
+  if (availableNames.length === 0) return null;
+
+  return (
+    <Box mt={5}>
+      <Flex align='center' justify='space-between' gap={3} mb={3}>
+        <Heading as='h3' size='sm'>
+          {t('Suggested names')}
+        </Heading>
+        <Button size='xs' variant='ghost' colorScheme='red' onClick={props.onClear}>
+          {t('Clear suggestions')}
+        </Button>
+      </Flex>
+      <Flex wrap='wrap' gap={2}>
+        {availableNames.map((name) => (
+          <Flex key={name} align='center' borderWidth='1px' rounded='full' overflow='hidden'>
+            <Button size='sm' variant='ghost' leftIcon={<UserPlus size={14} />} onClick={() => props.onAdd(name)}>
+              {name}
+            </Button>
+            <Button size='sm' variant='ghost' colorScheme='red' px={2} onClick={() => props.onRemove(name)} aria-label={t('Remove suggestion')}>
+              <X size={14} />
+            </Button>
+          </Flex>
+        ))}
+      </Flex>
+    </Box>
+  );
+}
+
+function normalizeName(name: string) {
+  return name.trim().replace(/\s+/g, ' ');
 }
 
 function AssignmentContent(props: PeopleStepProps) {

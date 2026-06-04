@@ -1,6 +1,7 @@
 import type { Allocation, Item, Person } from '../types/bill';
 
 const BILL_STORAGE_KEY = 'hisobchi.bill.v1';
+const NAME_SUGGESTIONS_STORAGE_KEY = 'hisobchi.nameSuggestions.v1';
 
 type SavedBillState = {
   schemaVersion: 1;
@@ -47,4 +48,32 @@ export function saveBillState(state: BillState) {
 
 export function clearBillState() {
   localStorage.removeItem(BILL_STORAGE_KEY);
+}
+
+export function loadNameSuggestions() {
+  try {
+    const raw = localStorage.getItem(NAME_SUGGESTIONS_STORAGE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+
+    return Array.isArray(parsed) ? normalizeNames(parsed.filter((name): name is string => typeof name === 'string')) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveNameSuggestions(names: string[]) {
+  localStorage.setItem(NAME_SUGGESTIONS_STORAGE_KEY, JSON.stringify(normalizeNames(names)));
+}
+
+export function clearNameSuggestions() {
+  localStorage.removeItem(NAME_SUGGESTIONS_STORAGE_KEY);
+}
+
+export function normalizeName(name: string) {
+  return name.trim().replace(/\s+/g, ' ');
+}
+
+function normalizeNames(names: string[]) {
+  const normalizedNames = names.map(normalizeName).filter(Boolean);
+  return [...new Map(normalizedNames.map((name) => [name.toLocaleLowerCase(), name])).values()];
 }

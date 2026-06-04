@@ -5,7 +5,15 @@ import { BottomNav } from './components/BottomNav';
 import { getBillTotals, getPersonTotals } from './lib/calculations';
 import { round } from './lib/format';
 import { getStepFromSearch, persistStep } from './lib/navigation';
-import { clearBillState, loadBillState, saveBillState } from './lib/storage';
+import {
+  clearBillState,
+  clearNameSuggestions,
+  loadBillState,
+  loadNameSuggestions,
+  normalizeName,
+  saveBillState,
+  saveNameSuggestions,
+} from './lib/storage';
 import type { Allocation, Item, Person, Step } from './types/bill';
 
 const MealStep = lazy(() => import('./features/meals/MealStep'));
@@ -21,6 +29,7 @@ export function App() {
   const [serviceFee, setServiceFee] = useState(savedBillState.serviceFee);
   const [people, setPeople] = useState<Person[]>(savedBillState.people);
   const [allocations, setAllocations] = useState<Allocation>(savedBillState.allocations);
+  const [nameSuggestions, setNameSuggestions] = useState<string[]>(() => loadNameSuggestions());
 
   const shellBg = useColorModeValue('gray.100', 'gray.900');
   const { subtotal, taxAmount, grandTotal } = getBillTotals(items, taxPercent, serviceFee);
@@ -31,6 +40,21 @@ export function App() {
   useEffect(() => {
     saveBillState({ items, people, allocations, taxPercent, serviceFee });
   }, [items, people, allocations, taxPercent, serviceFee]);
+
+  useEffect(() => {
+    saveNameSuggestions(nameSuggestions);
+  }, [nameSuggestions]);
+
+  useEffect(() => {
+    function saveCurrentPeopleNames() {
+      const currentNames = people.map((person) => person.name);
+      const nextSuggestions = getUniqueNames([...currentNames, ...nameSuggestions]);
+      saveNameSuggestions(nextSuggestions);
+    }
+
+    window.addEventListener('pagehide', saveCurrentPeopleNames);
+    return () => window.removeEventListener('pagehide', saveCurrentPeopleNames);
+  }, [people, nameSuggestions]);
 
   function navigateStep(nextStep: Step) {
     setStep(nextStep);
@@ -58,8 +82,25 @@ export function App() {
     setPeople((current) => [...current, { id: newId(), name: '' }]);
   }
 
+  function addSuggestedPerson(name: string) {
+    setPeople((current) => {
+      const normalizedName = normalizeName(name);
+      const alreadyAdded = current.some((person) => isSameName(person.name, normalizedName));
+      return alreadyAdded ? current : [...current, { id: newId(), name: normalizedName }];
+    });
+  }
+
   function updatePerson(id: string, name: string) {
     setPeople((current) => current.map((person) => (person.id === id ? { ...person, name } : person)));
+  }
+
+  function removeNameSuggestion(name: string) {
+    setNameSuggestions((current) => current.filter((value) => !isSameName(value, name)));
+  }
+
+  function clearSuggestions() {
+    setNameSuggestions([]);
+    clearNameSuggestions();
   }
 
   function removePerson(id: string) {
@@ -97,6 +138,9 @@ export function App() {
   }
 
   function resetBill() {
+    const nextSuggestions = getUniqueNames([...people.map((person) => person.name), ...nameSuggestions]);
+    setNameSuggestions(nextSuggestions);
+    saveNameSuggestions(nextSuggestions);
     setItems([]);
     setPeople([]);
     setAllocations({});
@@ -131,11 +175,15 @@ export function App() {
               people={people}
               allocations={allocations}
               totals={totals}
+              nameSuggestions={nameSuggestions}
               grandTotal={grandTotal}
               hasPeople={hasPeople}
               onAddPerson={addPerson}
+              onAddSuggestedPerson={addSuggestedPerson}
               onRemovePerson={removePerson}
               onUpdatePerson={updatePerson}
+              onRemoveNameSuggestion={removeNameSuggestion}
+              onClearNameSuggestions={clearSuggestions}
               onUpdateAllocation={updateAllocation}
               onSplitEvenly={splitItemEvenly}
             />
@@ -145,4 +193,13 @@ export function App() {
       <BottomNav step={step} mealCount={items.length} peopleCount={people.length} canContinue={canContinue} onNavigate={navigateStep} />
     </Box>
   );
+}
+
+function getUniqueNames(names: string[]) {
+  const normalizedNames = names.map(normalizeName).filter(Boolean);
+  return [...new Map(normalizedNames.map((name) => [name.toLocaleLowerCase(), name])).values()];
+}
+
+function isSameName(left: string, right: string) {
+  return normalizeName(left).toLocaleLowerCase() === normalizeName(right).toLocaleLowerCase();
 }

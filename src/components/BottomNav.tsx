@@ -22,7 +22,7 @@ export function BottomNav({ step, mealCount, peopleCount, canContinue, onNavigat
         <Stack
           bg={bg}
           borderWidth='1px'
-          rounded='2xl'
+          rounded='xl'
           shadow='xl'
           p={3}
           spacing={3}
@@ -38,23 +38,23 @@ export function BottomNav({ step, mealCount, peopleCount, canContinue, onNavigat
             </StepButton>
           </HStack>
           <Flex>
-          {step === 2 && (
-            <Button leftIcon={<ArrowLeft size={18} />} onClick={() => onNavigate(1)} size='lg' flex={1}>
-              {t('Back')}
-            </Button>
-          )}
-          {step === 1 && (
-            <Button
-              colorScheme='teal'
-              rightIcon={<ArrowRight size={18} />}
-              onClick={() => onNavigate(2)}
-              isDisabled={!canContinue}
-              size='lg'
-              flex={1}
-            >
-              {t('Continue')}
-            </Button>
-          )}
+            {step === 2 && (
+              <Button leftIcon={<ArrowLeft size={18} />} onClick={() => onNavigate(1)} size='lg' flex={1}>
+                {t('Back')}
+              </Button>
+            )}
+            {step === 1 && (
+              <Button
+                colorScheme='teal'
+                rightIcon={<ArrowRight size={18} />}
+                onClick={() => onNavigate(2)}
+                isDisabled={!canContinue}
+                size='lg'
+                flex={1}
+              >
+                {t('Continue')}
+              </Button>
+            )}
           </Flex>
         </Stack>
       </Container>
@@ -66,7 +66,7 @@ function StepButton(props: { children: string; isActive: boolean; onClick: () =>
   return (
     <Button
       size='sm'
-      rounded='full'
+      rounded='2xl'
       flex={1}
       colorScheme={props.isActive ? 'teal' : 'gray'}
       variant={props.isActive ? 'solid' : 'ghost'}

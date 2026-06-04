@@ -13,7 +13,7 @@ import {
   useColorModeValue,
   useToast,
 } from '@chakra-ui/react';
-import { ChevronDown, Moon, RotateCcw, Sun } from 'lucide-react';
+import { Check, ChevronDown, Moon, RotateCcw, Sun } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -28,6 +28,7 @@ export function AppHeader({ onReset }: AppHeaderProps) {
   const resetWarningTimer = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const navBg = useColorModeValue('white', 'gray.800');
   const brandColor = useColorModeValue('teal.700', 'teal.200');
+  const activeLanguage = i18n.resolvedLanguage || i18n.language;
 
   function changeLanguage(language: string) {
     localStorage.setItem('language', language);
@@ -73,12 +74,12 @@ export function AppHeader({ onReset }: AppHeaderProps) {
             bg={navBg}
             variant='outline'
           >
-            {getLanguageLabel(i18n.resolvedLanguage || i18n.language)}
+            {getLanguageLabel(activeLanguage)}
           </MenuButton>
           <MenuList minW='120px'>
-            <MenuItem onClick={() => changeLanguage('uz')}>UZ</MenuItem>
-            <MenuItem onClick={() => changeLanguage('en')}>EN</MenuItem>
-            <MenuItem onClick={() => changeLanguage('ru')}>RU</MenuItem>
+            <LanguageMenuItem language='uz' activeLanguage={activeLanguage} onClick={() => changeLanguage('uz')} />
+            <LanguageMenuItem language='en' activeLanguage={activeLanguage} onClick={() => changeLanguage('en')} />
+            <LanguageMenuItem language='ru' activeLanguage={activeLanguage} onClick={() => changeLanguage('ru')} />
           </MenuList>
         </Menu>
 
@@ -104,4 +105,22 @@ export function AppHeader({ onReset }: AppHeaderProps) {
 
 function getLanguageLabel(language: string) {
   return language.toUpperCase().slice(0, 2);
+}
+
+function LanguageMenuItem(props: { language: string; activeLanguage: string; onClick: () => void }) {
+  const isActive = props.activeLanguage.startsWith(props.language);
+  const activeBg = useColorModeValue('teal.50', 'teal.900');
+  const activeColor = useColorModeValue('teal.700', 'teal.100');
+
+  return (
+    <MenuItem
+      icon={isActive ? <Check size={16} /> : <span />}
+      bg={isActive ? activeBg : undefined}
+      color={isActive ? activeColor : undefined}
+      fontWeight={isActive ? 'bold' : 'normal'}
+      onClick={props.onClick}
+    >
+      {getLanguageLabel(props.language)}
+    </MenuItem>
+  );
 }
