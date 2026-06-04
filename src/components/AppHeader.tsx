@@ -8,10 +8,12 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Tooltip,
   useColorMode,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react';
-import { ChevronDown, Moon, Sun } from 'lucide-react';
+import { ChevronDown, Moon, RotateCcw, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getMealLabel, getPeopleLabel } from '../lib/navigation';
 import type { Step } from '../types/bill';
@@ -21,17 +23,30 @@ type AppHeaderProps = {
   mealCount: number;
   peopleCount: number;
   onNavigate: (step: Step) => void;
+  onReset: () => void;
 };
 
-export function AppHeader({ step, mealCount, peopleCount, onNavigate }: AppHeaderProps) {
+export function AppHeader({ step, mealCount, peopleCount, onNavigate, onReset }: AppHeaderProps) {
   const { i18n, t } = useTranslation();
   const { colorMode, toggleColorMode } = useColorMode();
+  const toast = useToast();
   const navBg = useColorModeValue('white', 'gray.800');
   const brandColor = useColorModeValue('teal.700', 'teal.200');
 
   function changeLanguage(language: string) {
     localStorage.setItem('language', language);
     void i18n.changeLanguage(language);
+  }
+
+  function warnBeforeReset() {
+    toast({
+      title: t('Resetting will delete everything.'),
+      description: t('Double-click Start over to confirm.'),
+      status: 'warning',
+      duration: 2400,
+      isClosable: true,
+      position: 'top',
+    });
   }
 
   return (
@@ -72,6 +87,15 @@ export function AppHeader({ step, mealCount, peopleCount, onNavigate }: AppHeade
           onClick={toggleColorMode}
           variant='solid'
         />
+        <Tooltip label={t('Start over')} hasArrow>
+          <IconButton
+            aria-label={t('Start over')}
+            icon={<RotateCcw size={18} />}
+            onClick={warnBeforeReset}
+            onDoubleClick={onReset}
+            variant='outline'
+          />
+        </Tooltip>
       </HStack>
     </Flex>
   );

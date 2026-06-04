@@ -1,10 +1,11 @@
 import { Box, Container, Spinner, useColorModeValue } from '@chakra-ui/react';
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { AppHeader } from './components/AppHeader';
 import { BottomNav } from './components/BottomNav';
 import { getBillTotals, getPersonTotals } from './lib/calculations';
 import { round } from './lib/format';
 import { getStepFromSearch, persistStep } from './lib/navigation';
+import { clearBillState, loadBillState, saveBillState } from './lib/storage';
 import type { Allocation, Item, Person, Step } from './types/bill';
 
 const MealStep = lazy(() => import('./features/meals/MealStep'));
@@ -13,18 +14,23 @@ const PeopleStep = lazy(() => import('./features/people/PeopleStep'));
 const newId = () => crypto.randomUUID();
 
 export function App() {
+  const [savedBillState] = useState(() => loadBillState());
   const [step, setStep] = useState<Step>(() => getStepFromSearch());
-  const [items, setItems] = useState<Item[]>([]);
-  const [taxPercent, setTaxPercent] = useState(0);
-  const [serviceFee, setServiceFee] = useState(0);
-  const [people, setPeople] = useState<Person[]>([]);
-  const [allocations, setAllocations] = useState<Allocation>({});
+  const [items, setItems] = useState<Item[]>(savedBillState.items);
+  const [taxPercent, setTaxPercent] = useState(savedBillState.taxPercent);
+  const [serviceFee, setServiceFee] = useState(savedBillState.serviceFee);
+  const [people, setPeople] = useState<Person[]>(savedBillState.people);
+  const [allocations, setAllocations] = useState<Allocation>(savedBillState.allocations);
 
   const shellBg = useColorModeValue('gray.100', 'gray.900');
   const { subtotal, taxAmount, grandTotal } = getBillTotals(items, taxPercent, serviceFee);
   const canContinue = items.some((item) => item.name.trim() && item.unitPrice > 0 && item.count > 0) && subtotal > 0;
   const hasPeople = people.some((person) => person.name.trim());
   const totals = getPersonTotals(items, people, allocations, taxAmount, serviceFee);
+
+  useEffect(() => {
+    saveBillState({ items, people, allocations, taxPercent, serviceFee });
+  }, [items, people, allocations, taxPercent, serviceFee]);
 
   function navigateStep(nextStep: Step) {
     setStep(nextStep);
@@ -90,10 +96,20 @@ export function App() {
     }));
   }
 
+  function resetBill() {
+    setItems([]);
+    setPeople([]);
+    setAllocations({});
+    setTaxPercent(0);
+    setServiceFee(0);
+    clearBillState();
+    navigateStep(1);
+  }
+
   return (
     <Box minH='100vh' bg={shellBg} pt={{ base: 5, md: 8 }} pb={{ base: 40, md: 44 }}>
       <Container maxW='3xl'>
-        <AppHeader step={step} mealCount={items.length} peopleCount={people.length} onNavigate={navigateStep} />
+        <AppHeader step={step} mealCount={items.length} peopleCount={people.length} onNavigate={navigateStep} onReset={resetBill} />
         <Suspense fallback={<Spinner />}>
           {step === 1 ? (
             <MealStep
