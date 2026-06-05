@@ -6,6 +6,7 @@ export type Item = {
   name: string;
   unitPrice: number;
   count: number;
+  scanWarning?: string;
 };
 
 export type Person = {

@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Flex, FormControl, FormLabel, HStack, Heading, Input, Stack, Text } from '@chakra-ui/react';
+import { Badge, Button, Card, CardBody, Flex, FormControl, FormLabel, HStack, Heading, Input, Stack, Text } from '@chakra-ui/react';
 import { Plus, ReceiptText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AmountField } from '../../components/AmountField';
@@ -7,6 +7,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { NumberField } from '../../components/NumberField';
 import { PercentField } from '../../components/PercentField';
 import { RemoveIconButton } from '../../components/RemoveIconButton';
+import { ReceiptScannerButton } from '../scanner/ReceiptScannerButton';
 import type { Item } from '../../types/bill';
 
 export type MealStepProps = {
@@ -19,6 +20,7 @@ export type MealStepProps = {
   onAddItem: () => void;
   onRemoveItem: (id: string) => void;
   onUpdateItem: (id: string, patch: Partial<Item>) => void;
+  onImportReceipt: (items: Item[], serviceFeePercent: number, serviceFeeAmount: number) => void;
   onTaxChange: (value: number) => void;
   onServiceChange: (value: number) => void;
 };
@@ -30,12 +32,15 @@ export default function MealStep(props: MealStepProps) {
     <Stack spacing={5}>
       <Card variant='outline' borderColor='teal.200'>
         <CardBody>
-          <HStack mb={5}>
-            <ReceiptText aria-hidden />
-            <Heading as='h2' size='md'>
-              {t('Meals and prices')}
-            </Heading>
-          </HStack>
+          <Flex justify='space-between' align='center' gap={3} mb={5}>
+            <HStack>
+              <ReceiptText aria-hidden />
+              <Heading as='h2' size='md'>
+                {t('Meals and prices')}
+              </Heading>
+            </HStack>
+            <ReceiptScannerButton onImport={props.onImportReceipt} />
+          </Flex>
           {props.items.length === 0 ? (
             <EmptyState title={t('Start with a meal')} description={t('Add each dish or shared item from the receipt.')} />
           ) : (
@@ -46,7 +51,10 @@ export default function MealStep(props: MealStepProps) {
                     <FormLabel m={0}>
                       {t('Meal')} {index + 1}
                     </FormLabel>
-                    <RemoveIconButton onRemove={() => props.onRemoveItem(item.id)} />
+                    <HStack>
+                      {item.scanWarning && <Badge colorScheme='orange'>{t(item.scanWarning)}</Badge>}
+                      <RemoveIconButton onRemove={() => props.onRemoveItem(item.id)} />
+                    </HStack>
                   </Flex>
                   <FormControl>
                     <Input

@@ -64,6 +64,13 @@ export function App() {
     setItems((current) => [...current, { id: newId(), source: 'manual', name: '', unitPrice: 0, count: 1 }]);
   }
 
+  function importReceipt(itemsToImport: Item[], serviceFeePercent: number, serviceFeeAmount: number) {
+    setItems(itemsToImport);
+    setAllocations({});
+    setTaxPercent(serviceFeePercent);
+    setServiceFee(serviceFeeAmount);
+  }
+
   function updateItem(id: string, patch: Partial<Item>) {
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   }
@@ -165,6 +172,7 @@ export function App() {
               onAddItem={addItem}
               onRemoveItem={removeItem}
               onUpdateItem={updateItem}
+              onImportReceipt={importReceipt}
               onTaxChange={setTaxPercent}
               onServiceChange={setServiceFee}
             />
