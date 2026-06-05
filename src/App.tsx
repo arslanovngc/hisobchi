@@ -3,7 +3,6 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { AppHeader } from './components/AppHeader';
 import { BottomNav } from './components/BottomNav';
 import { getBillTotals, getPersonTotals } from './lib/calculations';
-import { round } from './lib/format';
 import { getStepFromSearch, persistStep } from './lib/navigation';
 import {
   clearBillState,
@@ -130,7 +129,7 @@ export function App() {
     const activePeople = people.filter((person) => person.name.trim());
     if (!activePeople.length) return;
 
-    const share = round(item.count / activePeople.length);
+    const share = item.count / activePeople.length;
     setAllocations((current) => ({
       ...current,
       [item.id]: Object.fromEntries(activePeople.map((person) => [person.id, share])),

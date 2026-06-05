@@ -18,10 +18,9 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import { Clipboard, Plus, UserPlus, UsersRound, X } from 'lucide-react';
+import { Clipboard, Minus, Plus, UserPlus, UsersRound, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../components/EmptyState';
-import { NumberField } from '../../components/NumberField';
 import { RemoveIconButton } from '../../components/RemoveIconButton';
 import { getAssignedCount } from '../../lib/calculations';
 import { amount, round } from '../../lib/format';
@@ -233,6 +232,8 @@ function AssignmentContent(props: PeopleStepProps) {
 function AssignmentCard(props: PeopleStepProps & { item: Item }) {
   const { t } = useTranslation();
   const assigned = getAssignedCount(props.item.id, props.allocations);
+  const remaining = round(props.item.count - assigned);
+  const status = getAssignmentStatus(remaining, t);
 
   return (
     <Box rounded='lg' borderWidth='1px' p={4}>
@@ -243,27 +244,89 @@ function AssignmentCard(props: PeopleStepProps & { item: Item }) {
             {amount.format(props.item.unitPrice)} x {props.item.count}
           </Text>
         </Box>
-        <Badge colorScheme={assigned > props.item.count ? 'red' : 'teal'}>
-          {round(assigned)} / {props.item.count}
+        <Badge colorScheme={status.color}>
+          {status.label}
         </Badge>
       </Flex>
+
+      {props.item.count === 1 && (
+        <Box mb={4}>
+          <Text color='gray.500' fontSize='sm' mb={2}>
+            {t('Who ate this?')}
+          </Text>
+          <Flex wrap='wrap' gap={2}>
+            {props.people.map((person) => (
+              <Button
+                key={person.id}
+                size='sm'
+                variant='outline'
+                onClick={() => assignFullItemToPerson(props, person.id)}
+              >
+                {person.name || t('Unnamed')}
+              </Button>
+            ))}
+          </Flex>
+        </Box>
+      )}
+
       <Stack spacing={3}>
         {props.people.map((person) => (
-          <NumberField
-            key={person.id}
-            label={person.name || t('Unnamed')}
-            value={props.allocations[props.item.id]?.[person.id] ?? 0}
-            min={0}
-            step={0.5}
-            onChange={(value) => props.onUpdateAllocation(props.item.id, person.id, value)}
-          />
+          <PersonQuantityStepper key={person.id} {...props} person={person} />
         ))}
       </Stack>
       <Button mt={4} size='sm' variant='outline' colorScheme='teal' onClick={() => props.onSplitEvenly(props.item)}>
-        {t('Split evenly')}
+        {t('Split equally')}
       </Button>
     </Box>
   );
+}
+
+function PersonQuantityStepper(props: PeopleStepProps & { item: Item; person: Person }) {
+  const { t } = useTranslation();
+  const value = props.allocations[props.item.id]?.[props.person.id] ?? 0;
+  const assigned = getAssignedCount(props.item.id, props.allocations);
+  const maxValue = round(value + Math.max(0, props.item.count - assigned));
+
+  function update(nextValue: number) {
+    props.onUpdateAllocation(props.item.id, props.person.id, Math.min(maxValue, Math.max(0, round(nextValue))));
+  }
+
+  return (
+    <Flex align='center' justify='space-between' gap={3} rounded='lg' borderWidth='1px' p={3}>
+      <Text fontWeight='medium'>{props.person.name || t('Unnamed')}</Text>
+      <Flex align='center' gap={2}>
+        <Button size='sm' variant='outline' onClick={() => update(value - 1)} isDisabled={value <= 0} aria-label={t('Decrease count')}>
+          <Minus size={16} />
+        </Button>
+        <Button size='sm' minW='64px' variant='ghost' onClick={() => update(value + 1)}>
+          {round(value)}
+        </Button>
+        <Button
+          size='sm'
+          variant='outline'
+          colorScheme='teal'
+          onClick={() => update(value + 1)}
+          isDisabled={value >= maxValue}
+          aria-label={t('Increase count')}
+        >
+          <Plus size={16} />
+        </Button>
+      </Flex>
+    </Flex>
+  );
+}
+
+function assignFullItemToPerson(props: PeopleStepProps & { item: Item }, personId: string) {
+  props.people.forEach((person) => {
+    props.onUpdateAllocation(props.item.id, person.id, person.id === personId ? props.item.count : 0);
+  });
+}
+
+function getAssignmentStatus(remaining: number, t: (key: string) => string) {
+  if (Math.abs(remaining) <= 0.01) return { label: t('Done'), color: 'green' };
+  if (remaining === 0) return { label: t('Done'), color: 'green' };
+  if (remaining < 0) return { label: `${Math.abs(remaining)} ${t('over')}`, color: 'red' };
+  return { label: `${remaining} ${t('left')}`, color: 'gray' };
 }
 
 function formatSplitForCopy(totals: PersonTotal[]) {
