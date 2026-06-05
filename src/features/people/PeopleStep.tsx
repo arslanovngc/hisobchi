@@ -7,7 +7,6 @@ import {
   Divider,
   Flex,
   FormControl,
-  FormLabel,
   HStack,
   Heading,
   Input,
@@ -74,13 +73,13 @@ export default function PeopleStep(props: PeopleStepProps) {
           ) : (
             <Stack spacing={4}>
               {props.people.map((person, index) => (
-                <Stack key={person.id} spacing={3} rounded='lg' borderWidth='1px' p={4}>
-                  <Flex align='center' justify='space-between' gap={3}>
-                    <FormLabel m={0}>
-                      {t('Person')} {index + 1}
-                    </FormLabel>
+                <Stack key={person.id} spacing={3} rounded='lg' borderWidth='1px' p={4} pt={12} position='relative'>
+                  <Badge position='absolute' top={3} left={3} colorScheme='purple' rounded='full' px={2}>
+                    #{index + 1}
+                  </Badge>
+                  <HStack position='absolute' top={2} right={2}>
                     <RemoveIconButton onRemove={() => props.onRemovePerson(person.id)} />
-                  </Flex>
+                  </HStack>
                   <FormControl>
                     <Input
                       value={person.name}
@@ -92,7 +91,7 @@ export default function PeopleStep(props: PeopleStepProps) {
               ))}
             </Stack>
           )}
-          <Button mt={5} leftIcon={<Plus size={18} />} onClick={props.onAddPerson}>
+          <Button mt={5} w='full' leftIcon={<Plus size={18} />} onClick={props.onAddPerson}>
             {t('Add person')}
           </Button>
           <NameSuggestions

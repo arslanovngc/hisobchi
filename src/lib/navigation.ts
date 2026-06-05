@@ -12,9 +12,9 @@ export function persistStep(step: Step) {
 }
 
 export function getMealLabel(count: number, t: (key: string) => string) {
-  return count === 0 ? t('No meals') : `${count} ${t(count === 1 ? 'meal' : 'meals')}`;
+  return `${t('Meals')} (${count})`;
 }
 
 export function getPeopleLabel(count: number, t: (key: string) => string) {
-  return count === 0 ? t('No people') : `${count} ${t(count === 1 ? 'person' : 'people')}`;
+  return `${t('People')} (${count})`;
 }

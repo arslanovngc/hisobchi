@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, Flex, FormControl, FormLabel, HStack, Heading, Input, Stack, Text } from '@chakra-ui/react';
+import { Badge, Button, Card, CardBody, Flex, FormControl, HStack, Heading, Input, Stack, Text } from '@chakra-ui/react';
 import { Plus, ReceiptText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AmountField } from '../../components/AmountField';
@@ -46,16 +46,14 @@ export default function MealStep(props: MealStepProps) {
           ) : (
             <Stack spacing={4}>
               {props.items.map((item, index) => (
-                <Stack key={item.id} spacing={3} rounded='lg' borderWidth='1px' p={4}>
-                  <Flex align='center' justify='space-between' gap={3}>
-                    <FormLabel m={0}>
-                      {t('Meal')} {index + 1}
-                    </FormLabel>
-                    <HStack>
-                      {item.scanWarning && <Badge colorScheme='orange'>{t(item.scanWarning)}</Badge>}
-                      <RemoveIconButton onRemove={() => props.onRemoveItem(item.id)} />
-                    </HStack>
-                  </Flex>
+                <Stack key={item.id} spacing={3} rounded='lg' borderWidth='1px' p={4} pt={12} position='relative'>
+                  <Badge position='absolute' top={3} left={3} colorScheme='teal' rounded='full' px={2}>
+                    #{index + 1}
+                  </Badge>
+                  <HStack position='absolute' top={2} right={2}>
+                    {item.scanWarning && <Badge colorScheme='orange'>{t(item.scanWarning)}</Badge>}
+                    <RemoveIconButton onRemove={() => props.onRemoveItem(item.id)} />
+                  </HStack>
                   <FormControl>
                     <Input
                       value={item.name}
@@ -85,7 +83,7 @@ export default function MealStep(props: MealStepProps) {
               ))}
             </Stack>
           )}
-          <Button mt={5} leftIcon={<Plus size={18} />} onClick={props.onAddItem}>
+          <Button mt={5} w='full' leftIcon={<Plus size={18} />} onClick={props.onAddItem}>
             {t('Add meal')}
           </Button>
         </CardBody>
