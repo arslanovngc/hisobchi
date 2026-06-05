@@ -64,9 +64,13 @@ export default function MealStep(props: MealStepProps) {
                     <NumberField
                       label={t('Count')}
                       value={item.count}
-                      min={1}
                       step={1}
-                      onChange={(count) => props.onUpdateItem(item.id, { count: Math.max(1, count) })}
+                      placeholder='0'
+                      emptyWhenZero
+                      onChange={(count) => props.onUpdateItem(item.id, { count })}
+                      onBlur={() => {
+                        if (item.count < 1) props.onUpdateItem(item.id, { count: 1 });
+                      }}
                     />
                   </Stack>
                 </Stack>
