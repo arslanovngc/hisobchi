@@ -5,6 +5,7 @@ import {
   HStack,
   Heading,
   IconButton,
+  Image,
   Menu,
   MenuButton,
   MenuItem,
@@ -27,12 +28,73 @@ export function AppHeader({ onReset }: AppHeaderProps) {
   const { colorMode, toggleColorMode } = useColorMode();
   const toast = useToast();
   const [isVisible, setIsVisible] = useState(true);
+  const [logoSrc, setLogoSrc] = useState<string | null>(null);
+  const [logoFailed, setLogoFailed] = useState(false);
   const resetWarningTimer = useRef<ReturnType<typeof window.setTimeout> | null>(null);
   const previousScrollY = useRef(0);
   const headerBg = useColorModeValue('whiteAlpha.900', 'gray.900');
   const navBg = useColorModeValue('white', 'gray.800');
   const brandColor = useColorModeValue('teal.700', 'teal.200');
+  const logoShellBg = useColorModeValue('transparent', 'gray.900');
+  const logoShellBorder = useColorModeValue('transparent', 'whiteAlpha.300');
   const activeLanguage = i18n.resolvedLanguage || i18n.language;
+
+  useEffect(() => {
+    let active = true;
+    setLogoSrc(null);
+    setLogoFailed(false);
+
+    const image = new window.Image();
+    image.src = '/logo.png';
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+
+      if (!context || !active) {
+        return;
+      }
+
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      context.drawImage(image, 0, 0);
+
+      const frame = context.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = frame.data;
+      const shouldWhitenMarks = colorMode === 'dark';
+
+      for (let index = 0; index < pixels.length; index += 4) {
+        const red = pixels[index];
+        const green = pixels[index + 1];
+        const blue = pixels[index + 2];
+
+        if (red > 240 && green > 240 && blue > 240) {
+          pixels[index + 3] = 0;
+          continue;
+        }
+
+        if (shouldWhitenMarks) {
+          pixels[index] = 255;
+          pixels[index + 1] = 255;
+          pixels[index + 2] = 255;
+        }
+      }
+
+      context.putImageData(frame, 0, 0);
+
+      if (active) {
+        setLogoSrc(canvas.toDataURL('image/png'));
+      }
+    };
+    image.onerror = () => {
+      if (active) {
+        setLogoFailed(true);
+      }
+    };
+
+    return () => {
+      active = false;
+    };
+  }, [colorMode]);
 
   useEffect(() => {
     function handleScroll() {
@@ -94,10 +156,40 @@ export function AppHeader({ onReset }: AppHeaderProps) {
         transform={isVisible ? 'translateY(0)' : 'translateY(-100%)'}
         transition='transform 180ms ease'
       >
-        <Flex maxW='3xl' mx='auto' px={{ base: 4, md: 0 }} py={3} align='center' direction='row' justify='space-between' gap={4}>
-          <Heading as='h1' size='lg' color={brandColor} letterSpacing='-0.02em'>
-            {t('Hisobchi')}
-          </Heading>
+        <Flex
+          maxW='3xl'
+          mx='auto'
+          px={{ base: 4, md: 0 }}
+          align='center'
+          direction='row'
+          justify='space-between'
+          gap={4}
+        >
+          <Box position='relative' minH='16' minW='140px' display='flex' alignItems='center'>
+            {/* {(!logoSrc || logoFailed) && (
+              <Heading as='h1' size='lg' color={brandColor} letterSpacing='-0.02em'>
+                {t('Hisobchi')}
+              </Heading>
+            )}
+
+            {logoSrc && !logoFailed && (
+              <Box
+                bg={logoShellBg}
+                borderColor={logoShellBorder}
+                borderRadius='md'
+                borderWidth='1px'
+                overflow='hidden'
+                p={1}
+                position='static'
+              >
+                <Image src={logoSrc} alt={t('Hisobchi')} h='16' objectFit='contain' />
+              </Box>
+            )} */}
+
+            <Heading as='h1' size='md' color={brandColor} letterSpacing='-0.02em'>
+              {t('Hisobchi')}
+            </Heading>
+          </Box>
           <HStack justify='end'>
             <Menu>
               <MenuButton
