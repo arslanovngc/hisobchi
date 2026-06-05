@@ -1,9 +1,10 @@
 export async function preprocessReceiptImage(file: File) {
   const image = await loadImage(file);
-  const scale = 2;
+  const targetWidth = 1800;
+  const scale = Math.min(2, targetWidth / image.naturalWidth);
   const canvas = document.createElement('canvas');
-  const width = image.naturalWidth * scale;
-  const height = image.naturalHeight * scale;
+  const width = Math.round(image.naturalWidth * scale);
+  const height = Math.round(image.naturalHeight * scale);
   canvas.width = width;
   canvas.height = height;
 
