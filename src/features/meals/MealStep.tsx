@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Flex, FormControl, FormLabel, HStack, Heading, Input, Stack } from '@chakra-ui/react';
+import { Button, Card, CardBody, Flex, FormControl, FormLabel, HStack, Heading, Input, Stack, Text } from '@chakra-ui/react';
 import { Plus, ReceiptText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AmountField } from '../../components/AmountField';
@@ -90,6 +90,9 @@ export default function MealStep(props: MealStepProps) {
           </Heading>
           <Stack spacing={4}>
             <PercentField label={t('Service fee (percentage)')} value={props.taxPercent} onChange={props.onTaxChange} />
+            <Text color='gray.500' fontWeight='bold' textAlign='center'>
+              {t('Or')}
+            </Text>
             <AmountField label={t('Service fee (amount)')} value={props.serviceFee} onChange={props.onServiceChange} />
             <BillTotals
               subtotal={props.subtotal}
