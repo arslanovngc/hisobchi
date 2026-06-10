@@ -17,7 +17,7 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import { Clipboard, Minus, Plus, UserPlus, UsersRound, X } from 'lucide-react';
+import { Check, Clipboard, Minus, Plus, UserPlus, UsersRound, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../components/EmptyState';
 import { RemoveIconButton } from '../../components/RemoveIconButton';
@@ -248,25 +248,32 @@ function AssignmentCard(props: PeopleStepProps & { item: Item }) {
         </Badge>
       </Flex>
 
-      {props.item.count === 1 && (
-        <Box mb={4}>
-          <Text color='gray.500' fontSize='sm' mb={2}>
-            {t('Who ate this?')}
-          </Text>
-          <Flex wrap='wrap' gap={2}>
-            {props.people.map((person) => (
-              <Button
-                key={person.id}
-                size='sm'
-                variant='outline'
-                onClick={() => assignFullItemToPerson(props, person.id)}
-              >
-                {person.name || t('Unnamed')}
-              </Button>
-            ))}
-          </Flex>
-        </Box>
-      )}
+      <Box mb={4}>
+        <Text color='gray.500' fontSize='sm' mb={2}>
+          {t('Who ate this?')}
+        </Text>
+        <Flex wrap='wrap' gap={2}>
+          {props.people
+            .filter((person) => person.name.trim())
+            .map((person) => {
+              const isSelected = (props.allocations[props.item.id]?.[person.id] ?? 0) > 0;
+
+              return (
+                <Button
+                  key={person.id}
+                  size='sm'
+                  variant={isSelected ? 'solid' : 'outline'}
+                  colorScheme={isSelected ? 'teal' : 'gray'}
+                  leftIcon={isSelected ? <Check size={15} /> : undefined}
+                  aria-pressed={isSelected}
+                  onClick={() => toggleMealPerson(props, person.id)}
+                >
+                  {person.name}
+                </Button>
+              );
+            })}
+        </Flex>
+      </Box>
 
       <Stack spacing={3}>
         {props.people.map((person) => (
@@ -315,9 +322,18 @@ function PersonQuantityStepper(props: PeopleStepProps & { item: Item; person: Pe
   );
 }
 
-function assignFullItemToPerson(props: PeopleStepProps & { item: Item }, personId: string) {
-  props.people.forEach((person) => {
-    props.onUpdateAllocation(props.item.id, person.id, person.id === personId ? props.item.count : 0);
+function toggleMealPerson(props: PeopleStepProps & { item: Item }, personId: string) {
+  const namedPeople = props.people.filter((person) => person.name.trim());
+  const currentSelection = namedPeople
+    .filter((person) => (props.allocations[props.item.id]?.[person.id] ?? 0) > 0)
+    .map((person) => person.id);
+  const nextSelection = currentSelection.includes(personId)
+    ? currentSelection.filter((id) => id !== personId)
+    : [...currentSelection, personId];
+  const share = nextSelection.length > 0 ? props.item.count / nextSelection.length : 0;
+
+  namedPeople.forEach((person) => {
+    props.onUpdateAllocation(props.item.id, person.id, nextSelection.includes(person.id) ? share : 0);
   });
 }
 
