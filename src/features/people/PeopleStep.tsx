@@ -1,4 +1,6 @@
 import {
+  Alert,
+  AlertIcon,
   Badge,
   Box,
   Button,
@@ -10,6 +12,7 @@ import {
   HStack,
   Heading,
   Input,
+  Link,
   Stack,
   Stat,
   StatLabel,
@@ -113,6 +116,8 @@ export default function PeopleStep(props: PeopleStepProps) {
         </CardBody>
       </Card>
 
+      <SplitWarnings items={props.items} allocations={props.allocations} />
+
       <Card variant='outline' borderColor='green.200'>
         <CardBody>
           <Flex align='center' justify='space-between' gap={3} mb={5}>
@@ -162,6 +167,45 @@ export default function PeopleStep(props: PeopleStepProps) {
         <StatNumber>{amount.format(props.grandTotal)}</StatNumber>
       </Stat>
     </Stack>
+  );
+}
+
+function SplitWarnings(props: { items: Item[]; allocations: Allocation }) {
+  const { t } = useTranslation();
+  const warnings = props.items
+    .map((item) => {
+      const assigned = getAssignedCount(item.id, props.allocations);
+      const remaining = round(item.count - assigned);
+      if (Math.abs(remaining) <= 0.01) return null;
+
+      return {
+        id: item.id,
+        mealName: item.name || t('Unnamed meal'),
+        message: assigned <= 0 ? t('is not split') : t('is not fully split'),
+        detail: remaining > 0 ? `${remaining} ${t('left')}` : `${Math.abs(remaining)} ${t('over')}`,
+      };
+    })
+    .filter((warning): warning is { id: string; mealName: string; message: string; detail: string } => warning !== null);
+
+  if (warnings.length === 0) return null;
+
+  return (
+    <Alert status='warning' variant='left-accent' rounded='lg' alignItems='start'>
+      <AlertIcon mt={1} />
+      <Box>
+        <Text fontWeight='bold'>{t('Incomplete meal splits')}</Text>
+        <Stack as='ul' spacing={1} mt={2} pl={4}>
+          {warnings.map((warning) => (
+            <Text as='li' key={warning.id}>
+              <Link href={`#meal-assignment-${warning.id}`} color='orange.700' fontWeight='semibold'>
+                {warning.mealName}
+              </Link>{' '}
+              {warning.message}: {warning.detail}
+            </Text>
+          ))}
+        </Stack>
+      </Box>
+    </Alert>
   );
 }
 
@@ -235,7 +279,7 @@ function AssignmentCard(props: PeopleStepProps & { item: Item }) {
   const status = getAssignmentStatus(remaining, t);
 
   return (
-    <Box rounded='lg' borderWidth='1px' p={4}>
+    <Box id={`meal-assignment-${props.item.id}`} rounded='lg' borderWidth='1px' p={4} scrollMarginTop={24}>
       <Flex justify='space-between' align='start' gap={4} mb={4}>
         <Box>
           <Text fontWeight='bold'>{props.item.name || t('Unnamed meal')}</Text>

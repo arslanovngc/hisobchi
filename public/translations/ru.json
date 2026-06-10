@@ -42,6 +42,7 @@
   "Reading receipt...": "Чек считывается...",
   "Resetting will delete everything.": "При сбросе все данные будут удалены.",
   "Split equally": "Разделить поровну",
+  "Incomplete meal splits": "Неполное разделение блюд",
   "Start with a meal": "Начните с блюда",
   "Start over": "Начать заново",
   "Subtotal": "Промежуточный итог",
@@ -57,6 +58,8 @@
   "Who ate what": "Кто что ел",
   "Who ate this?": "Кто это ел?",
   "extras": "дополнительно",
+  "is not fully split": "разделено не полностью",
+  "is not split": "не разделено",
   "left": "осталось",
   "over": "сверх"
 }

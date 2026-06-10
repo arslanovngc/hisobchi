@@ -42,6 +42,7 @@
   "Reading receipt...": "Reading receipt...",
   "Resetting will delete everything.": "Resetting will delete everything.",
   "Split equally": "Split equally",
+  "Incomplete meal splits": "Incomplete meal splits",
   "Start with a meal": "Start with a meal",
   "Start over": "Start over",
   "Subtotal": "Subtotal",
@@ -57,6 +58,8 @@
   "Who ate what": "Who ate what",
   "Who ate this?": "Who ate this?",
   "extras": "extras",
+  "is not fully split": "is not fully split",
+  "is not split": "is not split",
   "left": "left",
   "over": "over"
 }

@@ -42,6 +42,7 @@
   "Reading receipt...": "Chek o'qilmoqda...",
   "Resetting will delete everything.": "Qayta boshlash hamma narsani o'chirib yuboradi.",
   "Split equally": "Teng taqsimlash",
+  "Incomplete meal splits": "Tugallanmagan taom taqsimotlari",
   "Start with a meal": "Taomdan boshlang",
   "Start over": "Qaytadan boshlash",
   "Subtotal": "Oraliq jami",
@@ -57,6 +58,8 @@
   "Who ate what": "Kim nima yedi",
   "Who ate this?": "Buni kim yedi?",
   "extras": "qo'shimcha",
+  "is not fully split": "to'liq taqsimlanmagan",
+  "is not split": "taqsimlanmagan",
   "left": "qoldi",
   "over": "ortiqcha"
 }

@@ -11,6 +11,9 @@ const theme = extendTheme({
   },
   styles: {
     global: {
+      html: {
+        scrollBehavior: "smooth",
+      },
       body: {
         bg: "chakra-body-bg",
       },
